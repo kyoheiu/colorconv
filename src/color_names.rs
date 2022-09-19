@@ -9,7 +9,7 @@ pub fn search_color_code(name: &str) -> Option<String> {
 }
 
 /// Search color names that match the queries.
-pub fn search_color_names(queries: &[String]) -> Option<Vec<String>> {
+pub fn search_color_names(queries: &[&str]) -> Option<Vec<String>> {
     let mut names = COLOR_NAMES.to_vec();
     for q in queries {
         names = names
