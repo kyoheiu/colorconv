@@ -9,7 +9,7 @@ pub fn search_color_code(name: &str) -> Option<String> {
 }
 
 /// Search color names that match the queries.
-pub fn search_color_names(queries: &[&str]) -> Option<Vec<&'static str>> {
+pub fn search_color_names(queries: &[&str]) -> Option<Vec<String>> {
     let mut names = COLOR_NAMES.to_vec();
     for q in queries {
         names = names
@@ -18,28 +18,10 @@ pub fn search_color_names(queries: &[&str]) -> Option<Vec<&'static str>> {
             .collect();
     }
     if !names.is_empty() {
-        Some(names)
+        Some(names.iter().map(|x| x.to_string()).collect())
     } else {
         None
     }
-}
-
-/// Convert color name to Camel case.
-fn to_camel(name: &str) -> String {
-    let mut result = "".to_string();
-    for word in name.split_ascii_whitespace() {
-        let mut new_word = "".to_string();
-        for (i, c) in word.chars().enumerate() {
-            if i == 0 {
-                new_word.push(c.to_ascii_uppercase());
-            } else {
-                new_word.push(c);
-            }
-        }
-        result.push_str(&new_word);
-        result.push(' ');
-    }
-    result.trim().to_string()
 }
 
 /// Compile-time hashmap (hex, name).

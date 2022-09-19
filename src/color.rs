@@ -2,27 +2,65 @@ use crate::{
     color_names::{search_color_code, search_color_name},
     errors::IroError,
 };
-use colored::Colorize;
 
-pub const LEN: usize = 42;
-
+/// Color information.
 pub struct Color {
     pub hex: String,
     pub name: Option<String>,
-    pub rgb: Vec<u8>,
+    pub rgb: [u8; 3],
     pub hsl: [f64; 3],
 }
 
-impl Color {
-    pub fn from_name(name: String) -> Result<Self, IroError> {
-        if let Some(code) = search_color_code(&name) {
+/// From hex code, or color name if exists.
+impl TryFrom<&str> for Color {
+    type Error = IroError;
+    fn try_from(s: &str) -> Result<Self, IroError> {
+        if let Some(code) = search_color_code(s) {
             Color::from_hex(&code)
         } else {
-            Err(IroError("No such color name.".to_string()))
+            Color::from_hex(s)
         }
     }
+}
 
-    pub fn from_hex(hex: &str) -> Result<Self, IroError> {
+/// From rgb.
+impl From<[u8; 3]> for Color {
+    fn from(rgb: [u8; 3]) -> Self {
+        let hex = format!("{}{}{}", to_hex(rgb[0]), to_hex(rgb[1]), to_hex(rgb[2]));
+        let name = search_color_name(&hex);
+        let hsl = convert_to_hsl(&rgb);
+        Color {
+            hex,
+            name,
+            rgb,
+            hsl,
+        }
+    }
+}
+
+/// From hsl.
+impl From<[f64; 3]> for Color {
+    fn from(hsl: [f64; 3]) -> Self {
+        let h = hsl::HSL {
+            h: hsl[0],
+            s: hsl[1],
+            l: hsl[2],
+        };
+        let rgb = h.to_rgb();
+        let rgb: [u8; 3] = [rgb.0, rgb.1, rgb.2];
+        let hex = format!("{}{}{}", to_hex(rgb[0]), to_hex(rgb[1]), to_hex(rgb[2]));
+        let name = search_color_name(&hex);
+        Color {
+            hex,
+            name,
+            rgb,
+            hsl,
+        }
+    }
+}
+
+impl Color {
+    fn from_hex(hex: &str) -> Result<Self, IroError> {
         let mut temp = "".to_string();
         let mut rgb_v = vec![];
         for (i, c) in hex.chars().enumerate() {
@@ -39,14 +77,15 @@ impl Color {
         let hex = hex.chars().take(6).collect::<String>().to_ascii_lowercase();
         let name = search_color_name(&hex);
 
-        let mut rgb = vec![];
-        for s in rgb_v {
-            let n = u8::from_str_radix(&s, 16);
-            match n {
-                Ok(x) => rgb.push(x),
-                Err(e) => return Err(IroError::from(e)),
-            }
+        let rgb: Vec<u8> = rgb_v
+            .iter()
+            .filter_map(|n| u8::from_str_radix(n, 16).ok())
+            .collect();
+        if rgb.len() != 3 {
+            return Err(IroError("Cannot convert to u8.".to_string()));
         }
+        let rgb: [u8; 3] = rgb.try_into().unwrap();
+
         let hsl = convert_to_hsl(&rgb);
         Ok(Color {
             hex,
@@ -55,134 +94,10 @@ impl Color {
             hsl,
         })
     }
-
-    pub fn from_rgb(r: u8, g: u8, b: u8) -> Self {
-        let rgb = vec![r, g, b];
-        let hex = format!("{}{}{}", to_hex(r), to_hex(g), to_hex(b));
-        let name = search_color_name(&hex);
-        let hsl = convert_to_hsl(&rgb);
-        Color {
-            hex,
-            name,
-            rgb,
-            hsl,
-        }
-    }
-
-    fn print_background(&self) {
-        println!(
-            "{}",
-            "█"
-                .repeat(LEN)
-                .truecolor(self.rgb[0], self.rgb[1], self.rgb[2])
-        );
-    }
-
-    fn print_hex(&self) {
-        let text = match &self.name {
-            Some(name) => {
-                format!("[#{}] {}", self.hex, name)
-            }
-            None => format!("[#{}]", self.hex),
-        };
-        if self.hsl[2] < 0.5 {
-            let len = text.len();
-            let diff = "█".repeat(LEN - len);
-            let text = text
-                .on_white()
-                .truecolor(self.rgb[0], self.rgb[1], self.rgb[2]);
-            let diff = diff.white();
-
-            print!("{}", text);
-            println!("{}", diff);
-        } else {
-            let text = text
-                .on_black()
-                .truecolor(self.rgb[0], self.rgb[1], self.rgb[2]);
-            println!("{}", text);
-        }
-    }
-
-    fn print_rgb(&self) {
-        let text = if self.hsl[2] < 0.5 {
-            format!("r: {} g: {} b: {}", self.rgb[0], self.rgb[1], self.rgb[2])
-                .white()
-                .on_truecolor(self.rgb[0], self.rgb[1], self.rgb[2])
-        } else {
-            format!("r: {} g: {} b: {}", self.rgb[0], self.rgb[1], self.rgb[2])
-                .black()
-                .on_truecolor(self.rgb[0], self.rgb[1], self.rgb[2])
-        };
-
-        let len = text.len();
-        let diff = LEN - len;
-        let prefix = "█"
-            .repeat(diff)
-            .truecolor(self.rgb[0], self.rgb[1], self.rgb[2]);
-        print!("{}", prefix);
-        println!("{}", text);
-    }
-
-    fn print_rgb_ratio(&self) {
-        let r_ratio: f64 = round_n(self.rgb[0]);
-        let g_ratio: f64 = round_n(self.rgb[1]);
-        let b_ratio: f64 = round_n(self.rgb[2]);
-        let text = if self.hsl[2] < 0.5 {
-            format!("({}, {}, {})", r_ratio, g_ratio, b_ratio)
-                .white()
-                .on_truecolor(self.rgb[0], self.rgb[1], self.rgb[2])
-        } else {
-            format!("({}, {}, {})", r_ratio, g_ratio, b_ratio)
-                .black()
-                .on_truecolor(self.rgb[0], self.rgb[1], self.rgb[2])
-        };
-
-        let len = text.len();
-        let diff = LEN - len;
-        let prefix = "█"
-            .repeat(diff)
-            .truecolor(self.rgb[0], self.rgb[1], self.rgb[2]);
-        print!("{}", prefix);
-        println!("{}", text);
-    }
-
-    fn print_hsl(&self) {
-        let text = if self.hsl[2] < 0.5 {
-            format!("h: {} s: {} l: {}", self.hsl[0], self.hsl[1], self.hsl[2])
-                .white()
-                .on_truecolor(self.rgb[0], self.rgb[1], self.rgb[2])
-        } else {
-            format!("h: {} s: {} l: {}", self.hsl[0], self.hsl[1], self.hsl[2])
-                .black()
-                .on_truecolor(self.rgb[0], self.rgb[1], self.rgb[2])
-        };
-
-        let len = text.len();
-        let diff = LEN - len;
-        let prefix = "█"
-            .repeat(diff)
-            .truecolor(self.rgb[0], self.rgb[1], self.rgb[2]);
-        print!("{}", prefix);
-        println!("{}", text);
-    }
-
-    pub fn print_color(&self) {
-        self.print_background();
-        self.print_hex();
-        self.print_rgb();
-        self.print_rgb_ratio();
-        self.print_hsl();
-        self.print_background();
-        println!();
-    }
 }
 
 fn round_f(n: f64) -> f64 {
     (n * 100.0).round() / 100.0
-}
-
-fn round_n(n: u8) -> f64 {
-    ((n as f64 / 255.0) * 100.0).round() / 100.0
 }
 
 fn convert_to_hsl(rgb: &[u8]) -> [f64; 3] {
