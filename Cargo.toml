@@ -7,7 +7,7 @@ description = "color conversion library"
 readme = "README.md"
 repository = "https://github.com/kyoheiu/colorconv"
 license = "MIT"
-keywords = ["color", "conversion", "color", "rgb", "hex color code"]
+keywords = ["color", "conversion", "rgb",]
 categories = ["graphics"]
 
 
