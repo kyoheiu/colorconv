@@ -2,11 +2,5 @@ mod color;
 mod color_names;
 mod errors;
 
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        let result = 2 + 2;
-        assert_eq!(result, 4);
-    }
-}
+pub use color::Color;
+pub use color_names::*;
