@@ -1,15 +1,42 @@
-/// Search color name by hex color code.
-pub fn search_color_name(hex: &str) -> Option<String> {
+/// Search the color name by a hex color code.
+///
+/// Example:
+/// ```
+/// use colorconv::find_by_hex;
+///
+/// if let Some(yellow) = find_by_hex("fea904") {
+///     assert_eq!("yellow sea".to_string(), yellow)
+/// }
+pub fn find_by_hex(hex: &str) -> Option<String> {
     COLOR_NAMES_MAP.get(hex).map(|s| s.to_string())
 }
 
-/// Search color code by a word.
-pub fn search_color_code(name: &str) -> Option<String> {
+/// Search the color code by a word.
+/// Note that this function returns only one color that match the keyword first. If you check all the candidates see `search_color_names`.
+///
+/// Example:
+/// ```
+/// use colorconv::find_by_name;
+///
+/// if let Some(green) = find_by_name("wintergreen") {
+///     assert_eq!("wintergreen dream".to_string(), green);
+/// }
+/// ```
+pub fn find_by_name(name: &str) -> Option<String> {
     COLOR_CODES_MAP.get(name).map(|s| s.to_string())
 }
 
-/// Search color names that match the queries.
-pub fn search_color_names(queries: &[&str]) -> Option<Vec<String>> {
+/// Return color names that match the queries.
+///
+/// Example:
+/// ```
+/// use colorconv::find_all_by_name;
+///
+/// if let Some(names) = find_all_by_name(&["raspberry"]) {
+///     assert_eq!(vec!["dark raspberry".to_string(), "french raspberry".to_string(), "pink raspberry".to_string(), "raspberry".to_string(), "raspberry pink".to_string(), "vivid raspberry".to_string()], names);
+/// }
+/// ```
+pub fn find_all_by_name(queries: &[&str]) -> Option<Vec<String>> {
     let mut names = COLOR_NAMES.to_vec();
     for q in queries {
         names = names

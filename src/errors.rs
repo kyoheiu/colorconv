@@ -1,8 +1,8 @@
 #[derive(Debug)]
-pub struct IroError(pub String);
+pub struct ColorConvError(pub String);
 
-impl From<std::num::ParseIntError> for IroError {
+impl From<std::num::ParseIntError> for ColorConvError {
     fn from(err: std::num::ParseIntError) -> Self {
-        IroError(err.to_string())
+        ColorConvError(err.to_string())
     }
 }

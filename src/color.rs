@@ -1,21 +1,22 @@
-use crate::{
-    color_names::{search_color_code, search_color_name},
-    errors::IroError,
-};
+use crate::{color_names::find_by_hex, errors::ColorConvError, find_by_name};
 
 /// Color information.
 pub struct Color {
+    /// hex color code
     pub hex: String,
+    /// color name if exists. Based on <https://github.com/jonathantneal/color-names>
     pub name: Option<String>,
+    /// RGB
     pub rgb: [u8; 3],
+    /// HSL
     pub hsl: [f64; 3],
 }
 
 /// From hex code, or color name if exists.
 impl TryFrom<&str> for Color {
-    type Error = IroError;
-    fn try_from(s: &str) -> Result<Self, IroError> {
-        if let Some(code) = search_color_code(s) {
+    type Error = ColorConvError;
+    fn try_from(s: &str) -> Result<Self, ColorConvError> {
+        if let Some(code) = find_by_name(s) {
             Color::from_hex(&code)
         } else {
             Color::from_hex(s)
@@ -27,7 +28,7 @@ impl TryFrom<&str> for Color {
 impl From<[u8; 3]> for Color {
     fn from(rgb: [u8; 3]) -> Self {
         let hex = format!("{}{}{}", to_hex(rgb[0]), to_hex(rgb[1]), to_hex(rgb[2]));
-        let name = search_color_name(&hex);
+        let name = find_by_hex(&hex);
         let hsl = convert_to_hsl(&rgb);
         Color {
             hex,
@@ -49,7 +50,7 @@ impl From<[f64; 3]> for Color {
         let rgb = h.to_rgb();
         let rgb: [u8; 3] = [rgb.0, rgb.1, rgb.2];
         let hex = format!("{}{}{}", to_hex(rgb[0]), to_hex(rgb[1]), to_hex(rgb[2]));
-        let name = search_color_name(&hex);
+        let name = find_by_hex(&hex);
         Color {
             hex,
             name,
@@ -60,7 +61,7 @@ impl From<[f64; 3]> for Color {
 }
 
 impl Color {
-    fn from_hex(hex: &str) -> Result<Self, IroError> {
+    fn from_hex(hex: &str) -> Result<Self, ColorConvError> {
         let mut temp = "".to_string();
         let mut rgb_v = vec![];
         for (i, c) in hex.chars().enumerate() {
@@ -75,14 +76,14 @@ impl Color {
 
         let _strip = hex.to_string().strip_prefix('#');
         let hex = hex.chars().take(6).collect::<String>().to_ascii_lowercase();
-        let name = search_color_name(&hex);
+        let name = find_by_hex(&hex);
 
         let rgb: Vec<u8> = rgb_v
             .iter()
             .filter_map(|n| u8::from_str_radix(n, 16).ok())
             .collect();
         if rgb.len() != 3 {
-            return Err(IroError("Cannot convert to u8.".to_string()));
+            return Err(ColorConvError("Cannot convert to u8.".to_string()));
         }
         let rgb: [u8; 3] = rgb.try_into().unwrap();
 
