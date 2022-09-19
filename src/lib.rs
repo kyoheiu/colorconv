@@ -1,7 +1,7 @@
 #![warn(missing_docs)]
-//! This crate provides some features to convert color code, RGB or color name(if exists) to the struct `Color` which holds the color information.
+//! This crate provides some features to convert color code, RGB or color name(if exists) to struct `Color` which holds the color information.
 //!
-//! What makes this crate (kind of) unique is that colorconv supports the color name conversion. For example:
+//! What makes this crate (kind of) unique is that it supports the color name conversion. For example:
 //! ```
 //! use colorconv::Color;
 //!

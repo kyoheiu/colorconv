@@ -11,8 +11,9 @@ pub fn find_by_hex(hex: &str) -> Option<String> {
     COLOR_NAMES_MAP.get(hex).map(|s| s.to_string())
 }
 
-/// Search the color code by a word.
-/// Note that this function returns only one color that match the keyword first. If you check all the candidates see `search_color_names`.
+/// Search the color code by a keyword.
+///
+/// Note that this function returns only one color that matches the keyword first. If you check all the candidates see `search_color_names`.
 ///
 /// Example:
 /// ```
