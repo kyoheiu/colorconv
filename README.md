@@ -1,3 +1,5 @@
+# colorconv
+
 This crate provides some features to convert color code, RGB or color name(if exists) to struct `Color` which holds the color information.
 
 What makes this crate (kind of) unique is that it supports the color name conversion. For example:
