@@ -13,9 +13,9 @@ pub struct Color {
 }
 
 /// From hex code, or color name if exists.
-impl TryFrom<&str> for Color {
-    type Error = ColorConvError;
-    fn try_from(s: &str) -> Result<Self, ColorConvError> {
+impl std::str::FromStr for Color {
+    type Err = ColorConvError;
+    fn from_str(s: &str) -> Result<Self, ColorConvError> {
         if let Some(code) = find_by_name(s) {
             Color::from_hex(&code)
         } else {
