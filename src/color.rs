@@ -1,4 +1,4 @@
-use crate::{color_names::find_by_hex, errors::ColorConvError, find_by_name};
+use crate::{color_names::find_by_hex, error::ColorConvError, find_by_name};
 
 /// Color information.
 pub struct Color {
