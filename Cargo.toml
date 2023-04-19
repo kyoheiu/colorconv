@@ -1,8 +1,8 @@
 [package]
 name = "colorconv"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
-authors = ["Kyohei Uto <kyoheiu@outlook.com>"]
+authors = ["Kyohei Uto <im@kyoheiu.dev>"]
 description = "color conversion library"
 readme = "README.md"
 repository = "https://github.com/kyoheiu/colorconv"
