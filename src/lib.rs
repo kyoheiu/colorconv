@@ -4,8 +4,9 @@
 //! What makes this crate (kind of) unique is that it supports the color name conversion. For example:
 //! ```
 //! use colorconv::Color;
+//! use std::str::FromStr;
 //!
-//! match Color::try_from("yale blue") {
+//! match Color::from_str("yale blue") {
 //!     Ok(color) => assert_eq!(color.hex, "0f4d92".to_string()),
 //!     Err(e) => eprintln!("{:?}", e),
 //! }
@@ -15,8 +16,9 @@
 //! Also, you can convert a color code or RGB:
 //! ```
 //! use colorconv::Color;
+//! use std::str::FromStr;
 //!
-//! if let Ok(rusty_red) = Color::try_from("da2c43") {
+//! if let Ok(rusty_red) = Color::from_str("da2c43") {
 //!     assert_eq!(Some("rusty red".to_string()), rusty_red.name);
 //! }
 //!
@@ -24,7 +26,7 @@
 //! assert_eq!("0073cf".to_string(), true_blue.hex);
 mod color;
 mod color_names;
-mod errors;
+mod error;
 
 pub use color::Color;
 pub use color_names::*;
